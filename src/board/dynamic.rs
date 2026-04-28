@@ -17,7 +17,6 @@ impl DynamicBoard {
 
 impl Board for DynamicBoard {
     type Key = Box<[u8]>;
-    type ParentExtra = Self;
 
     fn from_tiles(n: usize, tiles: &[u8]) -> Self {
         assert_eq!(tiles.len(), n * n);
@@ -75,10 +74,9 @@ impl Board for DynamicBoard {
         DynamicNeighborIter::new(self, target)
     }
 
-    fn parent_extra(&self) -> Self { self.clone() }
-
-    fn rebuild(_key: &Box<[u8]>, extra: &Self, _n: usize) -> Self {
-        extra.clone()
+    fn rebuild(key: &Box<[u8]>, n: usize) -> Self {
+        let empty = key.iter().position(|&t| t == 0).unwrap();
+        DynamicBoard { n, tiles: key.clone(), empty }
     }
 }
 

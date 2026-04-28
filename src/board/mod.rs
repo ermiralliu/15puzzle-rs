@@ -16,9 +16,6 @@ pub struct Neighbor<B> {
 
 pub trait Board: Sized + Clone + Eq {
     type Key: Eq + std::hash::Hash + Clone;
-    /// Extra data stored in the parent map for path reconstruction.
-    /// `()` for PackedBoard (key fully encodes board); `Self` for DynamicBoard.
-    type ParentExtra: Clone;
 
     fn from_tiles(n: usize, tiles: &[u8]) -> Self;
     fn goal(n: usize) -> Self;
@@ -51,8 +48,7 @@ pub trait Board: Sized + Clone + Eq {
 
     fn neighbors<'a>(&'a self, target: &'a Self) -> impl Iterator<Item = Neighbor<Self>> + 'a;
 
-    fn parent_extra(&self) -> Self::ParentExtra;
-    fn rebuild(key: &Self::Key, extra: &Self::ParentExtra, n: usize) -> Self;
+    fn rebuild(key: &Self::Key, n: usize) -> Self;
 }
 
 /// Compute Manhattan distance of a single tile from position `from` to `to` on an n×n grid.

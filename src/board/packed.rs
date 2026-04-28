@@ -29,7 +29,6 @@ impl PackedBoard {
 
 impl Board for PackedBoard {
     type Key = u64;
-    type ParentExtra = ();
 
     fn from_tiles(n: usize, tiles: &[u8]) -> Self {
         assert_eq!(n, 4);
@@ -92,9 +91,7 @@ impl Board for PackedBoard {
         PackedNeighborIter::new(self, target)
     }
 
-    fn parent_extra(&self) -> () { () }
-
-    fn rebuild(key: &u64, _extra: &(), _n: usize) -> Self {
+    fn rebuild(key: &u64, _n: usize) -> Self {
         let mut empty = 0u8;
         for i in 0..16 {
             if ((key >> (i * 4)) & 0xF) == 0 {

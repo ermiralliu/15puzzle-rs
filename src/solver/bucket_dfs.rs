@@ -15,9 +15,9 @@ pub fn solve<B: Board>(initial: B) -> Option<Solution<B>> {
     let goal = B::goal(n);
     let init_key = initial.key();
 
-    // child_key → (parent_key, ParentExtra)
-    let mut parents: FxHashMap<B::Key, (B::Key, B::ParentExtra)> = FxHashMap::default();
-    parents.insert(init_key.clone(), (init_key.clone(), initial.parent_extra()));
+    // child_key → parent_key (root points to itself)
+    let mut parents: FxHashMap<B::Key, B::Key> = FxHashMap::default();
+    parents.insert(init_key.clone(), init_key.clone());
 
     // Queue entries: (board, parent_key)
     let mut current: Vec<(B, B::Key)> = vec![(initial, init_key)];
@@ -27,11 +27,9 @@ pub fn solve<B: Board>(initial: B) -> Option<Solution<B>> {
         while let Some((board, entry_parent)) = current.pop() {
             let board_key = board.key();
 
-            if parents.contains_key(&board_key) {
-                // Already inserted on a same-bucket push; parent is correct.
-            } else {
+            if !parents.contains_key(&board_key) {
                 // Node came from next_box — insert with carried parent key.
-                parents.insert(board_key.clone(), (entry_parent, board.parent_extra()));
+                parents.insert(board_key.clone(), entry_parent);
             }
 
             if board.is_goal() {
@@ -46,7 +44,7 @@ pub fn solve<B: Board>(initial: B) -> Option<Solution<B>> {
                 if neighbor.is_next_box {
                     next_box.push((neighbor.board, board_key.clone()));
                 } else {
-                    parents.insert(nkey.clone(), (board_key.clone(), neighbor.board.parent_extra()));
+                    parents.insert(nkey.clone(), board_key.clone());
                     current.push((neighbor.board, board_key.clone()));
                 }
             }
@@ -60,15 +58,15 @@ pub fn solve<B: Board>(initial: B) -> Option<Solution<B>> {
 }
 
 fn reconstruct<B: Board>(
-    parents: &FxHashMap<B::Key, (B::Key, B::ParentExtra)>,
+    parents: &FxHashMap<B::Key, B::Key>,
     goal_key: &B::Key,
     n: usize,
 ) -> Solution<B> {
     let mut path = Vec::new();
     let mut key = goal_key.clone();
     loop {
-        let (parent_key, extra) = &parents[&key];
-        let board = B::rebuild(&key, extra, n);
+        let parent_key = &parents[&key];
+        let board = B::rebuild(&key, n);
         path.push(board);
         if parent_key == &key {
             break;
