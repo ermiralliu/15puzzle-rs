@@ -1,5 +1,7 @@
 use super::{Board, Neighbor, manhattan_dist};
 
+const GOAL_TILES: u64 = 0x0FED_CBA9_8765_4321;
+
 /// 4×4 board stored as a u64: tile at index i lives in nibble i (bits 4i..4i+4).
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct PackedBoard {
@@ -46,9 +48,7 @@ impl Board for PackedBoard {
 
     fn goal(n: usize) -> Self {
         assert_eq!(n, 4);
-        // Goal: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 0
-        let tiles: Vec<u8> = (1..=15).chain(std::iter::once(0)).collect();
-        Self::from_tiles(4, &tiles)
+        PackedBoard { tiles: GOAL_TILES, empty: 15 }
     }
 
     fn n(&self) -> usize { 4 }
@@ -60,7 +60,7 @@ impl Board for PackedBoard {
     fn tile_at(&self, idx: usize) -> u8 { self.get(idx) }
 
     fn is_goal(&self) -> bool {
-        self.tiles == 0x0FED_CBA9_8765_4321
+        self.tiles == GOAL_TILES
     }
 
     fn manhattan_to(&self, target: &Self) -> u32 {
