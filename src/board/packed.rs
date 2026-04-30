@@ -60,13 +60,7 @@ impl Board for PackedBoard {
     fn tile_at(&self, idx: usize) -> u8 { self.get(idx) }
 
     fn is_goal(&self) -> bool {
-        // Check tiles 0..14 are 1..15 and tile 15 is 0
-        for i in 0..15usize {
-            if self.get(i) != (i + 1) as u8 {
-                return false;
-            }
-        }
-        self.get(15) == 0
+        self.tiles == 0x0FED_CBA9_8765_4321
     }
 
     fn manhattan_to(&self, target: &Self) -> u32 {
